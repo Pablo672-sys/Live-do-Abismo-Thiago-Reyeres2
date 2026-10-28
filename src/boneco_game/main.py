@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from boneco_game.core.settings import ASSETS_DIR, STATIC_DIR, ensure_runtime_dirs
 from boneco_game.routes import map_editor, panel, renderer, walk_editor
@@ -16,6 +17,14 @@ def create_app() -> FastAPI:
     ensure_runtime_dirs()
     app = FastAPI(title="Boneco Game", version="0.1.0")
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+    @app.get("/manifest.webmanifest", include_in_schema=False)
+    def pwa_manifest():
+        return FileResponse(str(STATIC_DIR / "manifest.webmanifest"), media_type="application/manifest+json")
+
+    @app.get("/sw.js", include_in_schema=False)
+    def pwa_service_worker():
+        return FileResponse(str(STATIC_DIR / "sw.js"), media_type="application/javascript", headers={"Service-Worker-Allowed": "/"})
     app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
     app.include_router(panel.router)
     app.include_router(renderer.router)

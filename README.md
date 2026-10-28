@@ -1006,3 +1006,18 @@ Se também usa XTTS local:
 ```bash
 .venv/bin/python -m pip install -r requirements-live.txt
 ```
+
+
+## Instalação no celular
+
+### iPhone (Safari)
+
+1. Publique o servidor do Boneco em um endereço HTTPS acessível pela internet.
+2. Abra esse endereço no Safari do iPhone.
+3. Toque em **Compartilhar** e depois em **Adicionar à Tela de Início**.
+
+### Android (APK)
+
+O projeto Android em `android/` é um invólucro WebView e precisa apontar para o servidor público HTTPS. Antes de compilar, edite `android/app/src/main/java/com/pablo672/boneco/MainActivity.java` e substitua `https://example.com/` pelo endereço real do servidor. Depois, abra a pasta `android` no Android Studio e compile o módulo `app`, ou execute o workflow **Build Boneco Android APK** em Actions e baixe o artefato da execução.
+
+**Importante:** o APK não executa Ollama, o motor de live nem os modelos de voz no celular. Esses serviços precisam estar funcionando no servidor. Não exponha o painel diretamente à internet sem configurar proteção de acesso e HTTPS.

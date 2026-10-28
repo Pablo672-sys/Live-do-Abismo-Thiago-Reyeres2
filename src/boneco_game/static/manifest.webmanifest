@@ -1,0 +1,11 @@
+{
+  "name": "Boneco do Abismo",
+  "short_name": "Boneco",
+  "description": "Painel móvel do Boneco do Abismo",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101014",
+  "theme_color": "#17131f",
+  "orientation": "portrait"
+}

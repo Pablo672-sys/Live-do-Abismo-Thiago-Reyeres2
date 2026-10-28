@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -17,17 +17,12 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
       - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
       - name: Build APK
-        working-directory: android
-        run: |
-          chmod +x gradlew 2>/dev/null || true
-          if [ -f gradlew ]; then ./gradlew assembleDebug; else
-            gradle assembleDebug
-          fi
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        run: gradle -p android assembleDebug
+      - uses: actions/upload-artifact@v4
         with:
           name: Boneco-do-Abismo-Android
           path: android/app/build/outputs/apk/debug/*.apk

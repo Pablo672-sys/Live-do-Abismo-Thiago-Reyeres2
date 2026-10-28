@@ -13,3 +13,6 @@ Este site é publicado automaticamente em GitHub Pages pelo workflow `.github/wo
 
 ## Limite importante
 GitHub Pages hospeda apenas os arquivos estáticos deste site. O painel de live, o Ollama, a voz XTTS e o motor de transmissão precisam estar num servidor separado com HTTPS. A página permite informar o endereço HTTPS real desse servidor; ela não inventa nem cria um servidor de IA automaticamente.
+
+## Publicação
+O workflow de publicação é executado a cada alteração em `docs/` ou no próprio workflow. Consulte a aba Actions do repositório para ver o resultado mais recente.

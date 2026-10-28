@@ -1,0 +1,11 @@
+{
+  "name": "Boneco do Abismo",
+  "short_name": "Boneco Abismo",
+  "description": "Acesso móvel do Boneco do Abismo",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#100b18",
+  "theme_color": "#100b18",
+  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

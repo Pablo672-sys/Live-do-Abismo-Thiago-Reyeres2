@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, JSONResponse
+from pathlib import Path
+from boneco_game.core.settings import ASSETS_DIR, DEFAULT_AVATAR
 from fastapi.templating import Jinja2Templates
 
 from boneco_game.core.settings import TEMPLATES_DIR
@@ -54,6 +56,25 @@ def api_status() -> JSONResponse:
         "background_removal": background_removal_status(),
     })
 
+
+
+@router.post("/api/avatar/upload", response_class=JSONResponse)
+async def api_avatar_upload(kind: str = Form(...), file: UploadFile = File(...)) -> JSONResponse:
+    mode = str(kind or "").strip().lower()
+    suffix = Path(file.filename or "").suffix.lower()
+    allowed = {".png", ".jpg", ".jpeg", ".webp"} if mode == "still" else {".mp4", ".webm", ".mov"}
+    if mode not in {"still", "talking"} or suffix not in allowed:
+        return JSONResponse({"ok": False, "error": "Formato inválido. Use imagem PNG/JPG/WEBP ou vídeo MP4/WEBM/MOV."}, status_code=400)
+    data = await file.read(35 * 1024 * 1024 + 1)
+    if not data or len(data) > 35 * 1024 * 1024:
+        return JSONResponse({"ok": False, "error": "Arquivo vazio ou maior que 35 MB."}, status_code=400)
+    folder = ASSETS_DIR / DEFAULT_AVATAR / ("Mudo" if mode == "still" else "Falando")
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / ("Avatar-Base" + suffix if mode == "still" else "Avatar-Falando" + suffix)
+    for old in folder.glob("Avatar-Base.*" if mode == "still" else "Avatar-Falando.*"):
+        if old != target: old.unlink(missing_ok=True)
+    target.write_bytes(data)
+    return JSONResponse({"ok": True, "message": "Imagem parada salva." if mode == "still" else "Vídeo de fala salvo.", "filename": target.name})
 
 
 @router.get("/api/live/health", response_class=JSONResponse)

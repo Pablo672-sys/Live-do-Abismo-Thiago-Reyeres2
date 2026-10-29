@@ -1,0 +1,34 @@
+name: Validar e preparar versão do Boneco
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validar sintaxe Python
+        run: |
+          python -m compileall -q src
+      - name: Validar metadados e arquivos essenciais
+        run: |
+          test -f pyproject.toml
+          test -f requirements.txt
+          test -f src/boneco_game/services/system_update.py
+          test -f src/boneco_game/static/js/system_update.js
+      - name: Validar script Linux
+        run: bash -n scripts/start_clean_panel.sh

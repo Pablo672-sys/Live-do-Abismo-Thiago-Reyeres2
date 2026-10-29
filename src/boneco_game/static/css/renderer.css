@@ -651,6 +651,6 @@ body {
 
 .actorStill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:92%;max-height:88%;object-fit:contain;object-position:center bottom;z-index:5;filter:drop-shadow(0 18px 28px rgba(0,0,0,.28))}
 .actorStill[hidden]{display:none!important}
-#stage:not(.avatar-video-mode) .robot-character,#stage.avatar-video-mode .robot-character{display:none!important}
+#stage.avatar-image-mode .robot-character{display:none!important}
 #stage.avatar-photo-talking .actorStill{animation:avatarTalkPulse .18s ease-in-out infinite alternate}
 @keyframes avatarTalkPulse{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.008)}}

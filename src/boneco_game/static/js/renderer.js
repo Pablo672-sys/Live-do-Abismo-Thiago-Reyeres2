@@ -20,6 +20,7 @@ const TUNNEL_H = 640;
 const BELLY_PROFILE_BASE_SIZE = 92;
 
 const stage = document.getElementById("stage");
+stage.dataset.robot = "true";
 const tunnelCanvas = document.getElementById("tunnelCanvas");
 const tunnelCtx = tunnelCanvas ? tunnelCanvas.getContext("2d", { alpha: false }) : null;
 const skyLayer = document.getElementById("skyLayer");
@@ -1350,11 +1351,13 @@ async function pollSpeech() {
     const payload = await response.json();
     if (!payload.job) return false;
     speechBusy = true;
+    stage.classList.add("robot-talking");
     await playSpeechJob(payload.job);
     return true;
   } catch (err) {
     console.warn("speech failed", err);
     speechBusy = false;
+    stage.classList.remove("robot-talking");
     hideMessageCard();
     return false;
   } finally {
@@ -1952,6 +1955,7 @@ async function finishSpeechVisual(token = activeSpeechToken) {
   hideMessageCard();
   if (token !== activeSpeechToken) return;
   speechBusy = false;
+  stage.classList.remove("robot-talking");
   const startedNext = await pollSpeech();
   if (!startedNext && token === activeSpeechToken) {
     await setScene("idle").catch(console.warn);

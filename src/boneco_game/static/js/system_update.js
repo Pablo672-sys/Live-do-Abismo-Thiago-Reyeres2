@@ -14,7 +14,8 @@
   if (!openButton || !modal) return;
 
   let latest = null;
-  const liveRunning = () => Boolean(latestStatus?.live?.running || latestStatus?.transmission?.running);
+  let currentStatus = {};
+  const liveRunning = () => Boolean(currentStatus?.live?.running || currentStatus?.transmission?.running);
 
   function render(data) {
     latest = data || {};
@@ -107,7 +108,22 @@
     restartButton.disabled = false;
   }
 
-  openButton.addEventListener("click", async () => { modal.showModal(); await checkUpdate(true); });
+  async function refreshLiveStatus() {
+    try {
+      const response = await fetch("/api/status", { cache: "no-store" });
+      if (response.ok) {
+        currentStatus = await response.json();
+        if (latest) render(latest);
+      }
+    } catch (_) {}
+  }
+
+  // Consulta automaticamente ao abrir o painel e depois a cada 15 minutos.
+  // A instalação/aplicação continua protegida pelas verificações do servidor.
+  window.setTimeout(() => { checkUpdate(true); refreshLiveStatus(); }, 5000);
+  window.setInterval(() => { checkUpdate(true); refreshLiveStatus(); }, 15 * 60 * 1000);
+
+  openButton.addEventListener("click", async () => { modal.showModal(); await refreshLiveStatus(); await checkUpdate(true); });
   closeButton.addEventListener("click", () => modal.close());
   checkButton.addEventListener("click", () => checkUpdate(true));
   updateButton.addEventListener("click", applyUpdate);

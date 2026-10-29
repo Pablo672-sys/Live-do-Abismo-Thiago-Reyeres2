@@ -1,4 +1,4 @@
-name: Deploy Boneco iPhone Site to GitHub Pages
+name: Deploy Boneco informational site to GitHub Pages
 
 on:
   push:

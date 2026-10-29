@@ -1,0 +1,29 @@
+BONECO DO ABISMO — COMECE AQUI
+
+WINDOWS 10/11
+1. Extraia o ZIP completo.
+2. Abra a pasta Windows_instalar.
+3. Dê dois cliques em INSTALAR.bat.
+4. Se pedir, instale Python 3.12: https://www.python.org/downloads/
+
+LINUX (UBUNTU/DEBIAN)
+1. Extraia o ZIP completo.
+2. Abra um terminal na pasta extraída.
+3. Execute:
+   chmod +x linux_instalar/instalar.sh
+   ./linux_instalar/instalar.sh
+
+PAINEL LOCAL
+Depois de iniciar, abra http://127.0.0.1:9292 no navegador.
+
+IMPORTANTE SOBRE A VOZ
+A gravação que está no repositório atualmente se chama
+assets/BONECO_MAPA_2D/voz/VOZ_RAPIDA_MASCULINA.wav.
+Ela ainda não foi substituída porque a gravação original do Boneco do Abismo
+não foi identificada no repositório. Para usar a voz original, é necessário
+incluir a gravação de referência correta nos assets.
+
+OBSERVAÇÃO
+A instalação prepara o painel e as dependências básicas. Uma live completa pode
+exigir configuração adicional de XTTS/CUDA, Tor, navegador, áudio, vídeos e
+credenciais privadas. Nunca coloque chaves de transmissão ou credenciais no ZIP público.

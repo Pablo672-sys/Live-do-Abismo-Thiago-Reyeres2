@@ -1335,6 +1335,7 @@ async function pollState() {
     if (nextMediaVersion) mediaCacheVersion = nextMediaVersion;
     mediaState = payload.media || mediaState;
     avatarStillPath = String(payload.avatar_image || "");
+    stage.classList.toggle("avatar-image-mode", Boolean(avatarStillPath));
     runtimeConfig = {
       ...runtimeConfig,
       ...(payload.runtime || {}),

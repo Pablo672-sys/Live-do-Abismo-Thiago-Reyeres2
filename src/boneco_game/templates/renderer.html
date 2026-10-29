@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=720,height=1280,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="google" content="notranslate">
   <title>Boneco Game Renderer</title>
-  <link rel="stylesheet" href="/static/css/renderer.css?v=22">
+  <link rel="stylesheet" href="/static/css/renderer.css?v=23">
 </head>
 <body class="notranslate">
   <div id="stage">
@@ -20,6 +20,31 @@
       <div id="mapBack"></div>
       <div id="actorLayer">
         <div id="actorShadow"></div>
+        <div id="robotCharacter" class="robot-character" aria-label="Boneco robô de frente">
+          <div class="robot-antenna"><i></i></div>
+          <div class="robot-head">
+            <div class="robot-ear robot-ear-left"></div><div class="robot-ear robot-ear-right"></div>
+            <div class="robot-face">
+              <div class="robot-brow"></div>
+              <div class="robot-eyes"><i></i><i></i></div>
+              <div class="robot-mouth"><i></i></div>
+            </div>
+            <div class="robot-neck"></div>
+          </div>
+          <div class="robot-body">
+            <div class="robot-shoulder robot-shoulder-left"></div><div class="robot-shoulder robot-shoulder-right"></div>
+            <div class="robot-arm robot-arm-left"><div class="robot-forearm"></div><div class="robot-hand"></div></div>
+            <div class="robot-arm robot-arm-right"><div class="robot-forearm"></div><div class="robot-hand"></div></div>
+            <div class="robot-chest">
+              <div class="robot-chest-label">B-01</div><div class="robot-core"></div>
+              <div class="robot-status-lights"><i></i><i></i><i></i></div>
+              <div class="robot-grille"><i></i><i></i><i></i></div>
+            </div>
+            <div class="robot-waist"></div>
+          </div>
+          <div class="robot-legs"><div class="robot-leg robot-leg-left"><div class="robot-knee"></div><div class="robot-foot"></div></div><div class="robot-leg robot-leg-right"><div class="robot-knee"></div><div class="robot-foot"></div></div></div>
+          <div class="robot-floor-glow"></div>
+        </div>
         <div id="bellyProfile" class="belly-profile" hidden>
           <img id="bellyProfileImage" alt="" hidden>
           <span id="bellyProfileLetter">B</span>
@@ -45,6 +70,6 @@
     <audio id="sceneAudio" preload="auto"></audio>
     <audio id="musicAudio" preload="auto" loop></audio>
   </div>
-  <script src="/static/js/renderer.js?v=51"></script>
+  <script src="/static/js/renderer.js?v=52"></script>
 </body>
 </html>

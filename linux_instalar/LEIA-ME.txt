@@ -1,0 +1,15 @@
+BONECO DO ABISMO — INSTALAÇÃO NO LINUX
+
+Compatibilidade automática: Ubuntu/Debian.
+
+1. Extraia o ZIP inteiro.
+2. Abra um terminal na pasta extraída.
+3. Execute:
+   chmod +x linux_instalar/instalar.sh
+   ./linux_instalar/instalar.sh
+4. Se o instalador perguntar, digite S para abrir o painel.
+5. O painel fica em http://127.0.0.1:9292
+
+O instalador usa sudo para instalar pacotes do sistema.
+A transmissão ao vivo e o motor XTTS podem precisar de configuração adicional.
+A voz original só pode ser usada quando sua gravação de referência estiver incluída no projeto.

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Boneco Game</title>
-  <link rel="stylesheet" href="/static/css/panel.css?v=7">
+  <link rel="stylesheet" href="/static/css/panel.css?v=8">
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#17131f">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -179,6 +179,18 @@
           <button id="startTransmission">Iniciar transmissão</button>
           <button id="stopTransmission">Parar transmissão</button>
         </div>
+      </article>
+
+      <article class="card">
+        <h2>Personagem da tela</h2>
+        <p>Escolha o visual que aparece no renderer. A troca é salva no estado do Boneco.</p>
+        <label for="characterSkin">Versão do Boneco</label>
+        <select id="characterSkin">
+          <option value="robot">Robô do Abismo</option>
+          <option value="spongebob">Bob Esponja</option>
+          <option value="homer">Homer Simpson</option>
+        </select>
+        <small id="characterSkinStatus">Selecione um personagem para aplicar.</small>
       </article>
 
       <article class="card">
@@ -398,8 +410,8 @@
     </form>
   </dialog>
   <script src="/static/js/background_removal.js?v=1"></script>
-  <script src="/static/js/system_update.js?v=1"></script>
-  <script src="/static/js/panel.js?v=11"></script>
+  <script src="/static/js/system_update.js?v=2"></script>
+  <script src="/static/js/panel.js?v=12"></script>
     <script>
       if ("serviceWorker" in navigator && location.protocol === "https:") {
         window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(console.error));

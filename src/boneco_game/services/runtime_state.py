@@ -125,6 +125,7 @@ def renderer_state() -> dict[str, Any]:
         "runtime": _runtime_config_for_renderer(),
         "map": read_map(avatar, map_name),
         "media": media,
+        "avatar_image": _avatar_still_path(avatar),
         "music": music,
         "visual_people": live_events.status().get("recent_people", []),
         "media_version": _media_version({**media, "music": music}),
@@ -148,3 +149,11 @@ def _float(value: object, default: float) -> float:
         return float(value)
     except (TypeError, ValueError):
         return float(default)
+
+
+def _avatar_still_path(avatar: str) -> str:
+    root = ASSETS_DIR / Path(avatar).name / "Mudo"
+    for suffix in (".png", ".webp", ".jpg", ".jpeg"):
+        candidate = root / f"Avatar-Base{suffix}"
+        if candidate.is_file(): return str(candidate)
+    return ""

@@ -473,3 +473,14 @@ document.getElementById("sendGiftEvent").addEventListener("click", async () => {
 });
 loadLiveConfig().finally(refreshStatus);
 setInterval(refreshStatus, 2500);
+
+async function uploadAvatarAsset(kind,inputId){
+ const input=document.getElementById(inputId),status=document.getElementById("avatarUploadStatus"),file=input?.files?.[0];
+ if(!file){if(status)status.textContent="Escolha um arquivo primeiro.";return;}
+ const form=new FormData();form.append("kind",kind);form.append("file",file);
+ if(status)status.textContent="Enviando arquivo...";
+ try{const response=await fetch("/api/avatar/upload",{method:"POST",body:form});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||"Falha no envio.");if(status)status.textContent=data.message+" Feche e abra o renderer para aplicar.";input.value="";}
+ catch(error){if(status)status.textContent="Erro: "+error.message;}
+}
+document.getElementById("uploadAvatarStill")?.addEventListener("click",()=>uploadAvatarAsset("still","avatarStillUpload"));
+document.getElementById("uploadAvatarTalking")?.addEventListener("click",()=>uploadAvatarAsset("talking","avatarTalkingUpload"));

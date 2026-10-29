@@ -199,6 +199,12 @@ def _synthesize_chunk(text: str, output: Path, *, voice_path: Path, language: st
         _write_tts_error(f"xtts rc={result.returncode} text={text[:160]} stderr={result.stderr[-1200:]}")
     except Exception as exc:
         _write_tts_error(f"xtts {type(exc).__name__}: {exc} text={text[:160]}")
+    # No Windows, use a fala nativa do sistema como último recurso. Antes o
+    # programa criava um tom senoidal que parecia um bip e escondia a falha do XTTS.
+    if os.name == "nt" and _synthesize_windows_sapi(text, output):
+        _trim_trailing_silence(output)
+        return
+    _write_tts_error(f"tts_failed_no_speech text={text[:160]}")
     _write_placeholder(output, duration=max(0.8, min(4.0, len(text) * 0.045)))
 
 
@@ -436,6 +442,40 @@ def _float_or_default(value: object, default: float) -> float:
         return float(value)
     except (TypeError, ValueError):
         return float(default)
+
+
+def _synthesize_windows_sapi(text: str, output: Path) -> bool:
+    """Gera fala real via Windows SAPI se XTTS falhar; nunca depende de internet."""
+    import base64
+
+    try:
+        encoded_text = base64.b64encode(text.encode("utf-8")).decode("ascii")
+        encoded_output = base64.b64encode(str(output.resolve()).encode("utf-8")).decode("ascii")
+        script = r"""
+$ErrorActionPreference = 'Stop'
+$text = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('__TEXT__'))
+$outPath = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('__OUT__'))
+Add-Type -AssemblyName System.Speech
+$speaker = New-Object System.Speech.Synthesis.SpeechSynthesizer
+try {
+  $voices = $speaker.GetInstalledVoices() | Where-Object { $_.Enabled -and $_.VoiceInfo.Culture.Name -like 'pt-BR*' }
+  if ($voices.Count -gt 0) { $speaker.SelectVoice($voices[0].VoiceInfo.Name) }
+  $speaker.Rate = 0
+  $speaker.Volume = 100
+  $speaker.SetOutputToWaveFile($outPath)
+  $speaker.Speak($text)
+  $speaker.SetOutputToNull()
+} finally { $speaker.Dispose() }
+""".replace("__TEXT__", encoded_text).replace("__OUT__", encoded_output)
+        result = subprocess.run(
+            ["powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script],
+            cwd=str(PROJECT_DIR), capture_output=True, text=True, timeout=45, check=False,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        return result.returncode == 0 and output.is_file() and output.stat().st_size > 44
+    except Exception as exc:
+        _write_tts_error(f"windows_sapi {type(exc).__name__}: {exc}")
+        return False
 
 
 def _write_placeholder(path: Path, *, duration: float) -> None:

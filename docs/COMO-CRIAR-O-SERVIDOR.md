@@ -1,28 +1,35 @@
-# Iniciar o Boneco do Abismo no Windows e abrir pelo iPhone
+# Boneco do Abismo — instalação no Windows e Linux
 
-## O que a pessoa precisa fazer
+Este guia é apenas para computadores Windows e Linux. Não é um tutorial de iPhone ou Android.
 
-1. No PC Windows, baixe o projeto pelo botão **Code → Download ZIP** no GitHub e extraia a pasta. Também pode usar Git se já estiver instalado.
-2. Instale **Python 3.12** para Windows. Durante a instalação, marque **Add Python to PATH**.
-3. Dentro da pasta extraída, clique com o botão direito em `start_boneco_windows.ps1` e escolha **Executar com PowerShell**. Se a política do Windows bloquear o script, abra o PowerShell dentro da pasta e execute:
+## Windows 10/11
+1. Baixe o projeto em **Code → Download ZIP** e extraia a pasta.
+2. Instale Python 3.12 e marque a opção para adicionar Python ao PATH.
+3. Abra PowerShell na pasta extraída e execute:
    ```powershell
-   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   Set-ExecutionPolicy -Scope Process Bypass
    .\start_boneco_windows.ps1
    ```
-4. Na primeira execução, o script cria o ambiente virtual e instala as dependências. Isso pode demorar e precisa de internet. Mantenha a janela aberta.
-5. Quando o servidor iniciar, o terminal mostrará os endereços locais. No próprio PC, teste `http://127.0.0.1:9292`.
-6. Conecte o iPhone à mesma rede Wi-Fi do PC. Abra o site do Boneco no Safari e, na seção **Abrir o painel**, digite o endereço de rede mostrado pelo script, por exemplo `http://192.168.1.50:9292). Use o IP real mostrado no seu terminal e toque em **Abrir painel**.
+4. Na primeira execução, o script cria o ambiente virtual e instala as dependências básicas.
+5. Abra http://127.0.0.1:9292 no navegador do PC e mantenha o terminal aberto.
 
-## Se o iPhone não conseguir conectar
+## Linux
+1. Instale Python 3.12, pip e venv usando o gerenciador de pacotes da sua distribuição.
+2. Abra um terminal na pasta extraída e execute:
+   ```bash
+   python3.12 -m venv .venv
+   source .venv/bin/activate
+   python -m pip install --upgrade pip
+   python -m pip install -r requirements.txt
+   python -m pip install -e . --no-deps
+   BONECO_GAME_DIR="$PWD" BONECO_GAME_ASSETS_DIR="$PWD/assets" BONECO_GAME_HOST=127.0.0.1 BONECO_GAME_PORT=9292 python -m uvicorn boneco_game.main:app --host 127.0.0.1 --port 9292
+   ```
+3. Abra http://127.0.0.1:9292 no navegador do mesmo computador.
 
-- Confirme que os dois aparelhos estão na mesma rede Wi-Fi, não em redes de convidados diferentes.
-- No Windows, aceite o aviso do Firewall para permitir Python em **redes privadas**. Se não aparecer aviso, peça ajuda para liberar a porta TCP 9292 somente na rede privada.
-- Não use `127.0.0.1` no iPhone: esse endereço aponta para o próprio celular, não para o PC.
-- Não abra a porta do servidor diretamente para a internet. Este guia é para rede local confiável.
+## Voz original do Boneco
+O serviço de síntese aponta para `assets/BONECO_MAPA_2D/voz/VOZ_RAPIDA_MASCULINA.wav` como referência vocal do Coqui XTTS. Para gerar falas, instale e configure as dependências e o modelo XTTS necessários. Não confunda o arquivo de referência com um modelo completo de síntese de voz.
 
-## Limites importantes
-
-- O PC precisa ficar ligado e a janela do servidor aberta enquanto o celular usa o painel.
-- O script prepara o servidor web e as dependências Python básicas. Ele não baixa automaticamente os modelos de IA, não configura credenciais do TikTok, Tor, XTTS ou transmissão RTMP. Esses recursos precisam ser configurados conforme o README principal e os arquivos privados de configuração.
-- O GitHub Pages hospeda apenas a página de entrada; não executa o backend Python.
-- Não compartilhe tokens de live, senhas nem arquivos privados no GitHub.
+## Importante
+- O ZIP é o código-fonte e o iniciador, não um instalador Windows .exe ou Linux AppImage.
+- Os recursos completos de live podem precisar de modelos de IA, credenciais privadas, Tor, áudio e software de transmissão configurados separadamente.
+- Não exponha o servidor diretamente à internet nem publique tokens ou senhas.

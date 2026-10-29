@@ -1,21 +1,38 @@
-# Boneco do Abismo — site para iPhone
+# Boneco do Abismo — Windows e Linux
 
-Este site é publicado automaticamente em GitHub Pages pelo workflow `.github/workflows/deploy-pages.yml`.
+Página de entrada do projeto para computador. Não oferecemos aqui instalação para iPhone ou Android.
 
-## Endereço esperado
-`https://pablo672-sys.github.io/Live-do-Abismo-Thiago-Reyeres2/`
+## Site
+https://pablo672-sys.github.io/Live-do-Abismo-Thiago-Reyeres2/
 
-## Instalar no iPhone
-1. Abra o endereço no Safari.
-2. Toque em Compartilhar.
-3. Escolha **Adicionar à Tela de Início**.
-4. Toque em **Adicionar**.
+## Baixar o projeto
+[Baixar o código-fonte em ZIP](https://github.com/Pablo672-sys/Live-do-Abismo-Thiago-Reyeres2/archive/refs/heads/main.zip)
 
-## Como criar o servidor
-Leia o [tutorial de criação do servidor](COMO-CRIAR-O-SERVIDOR.md). Ele explica a diferença entre testar no Windows e usar uma VPS na nuvem, que é o caminho para manter o servidor ligado com o seu PC desligado.
+O ZIP contém o código-fonte; não é um instalador .exe nem AppImage pronto.
 
-## Limite importante
-GitHub Pages hospeda apenas os arquivos estáticos deste site. O painel de live, o Ollama, a voz XTTS e o motor de transmissão precisam estar num servidor separado com HTTPS. A página permite informar o endereço HTTPS real desse servidor; ela não inventa nem cria um servidor de IA automaticamente.
+## Windows
+1. Extraia o ZIP.
+2. Instale Python 3.12.
+3. Abra PowerShell na pasta do projeto e execute:
+   ```powershell
+   Set-ExecutionPolicy -Scope Process Bypass
+   .\start_boneco_windows.ps1
+   ```
 
-## Publicação
-O workflow de publicação é executado a cada alteração em `docs/` ou no próprio workflow. Consulte a aba Actions do repositório para ver o resultado mais recente.
+## Linux
+Com Python 3.12 e o módulo venv instalados, na pasta do projeto:
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -e . --no-deps
+BONECO_GAME_DIR="$PWD" BONECO_GAME_ASSETS_DIR="$PWD/assets" BONECO_GAME_HOST=127.0.0.1 BONECO_GAME_PORT=9292 python -m uvicorn boneco_game.main:app --host 127.0.0.1 --port 9292
+```
+Abra http://127.0.0.1:9292 no navegador do computador.
+
+## Voz do Boneco
+O serviço de voz define como referência `assets/BONECO_MAPA_2D/voz/VOZ_RAPIDA_MASCULINA.wav` e usa Coqui XTTS para síntese. O XTTS e seus modelos precisam estar instalados/configurados para a geração de voz funcionar; o arquivo de referência por si só não é um aplicativo de voz independente.
+
+## Limitações
+O GitHub Pages hospeda apenas arquivos estáticos. O servidor, IA, modelos, credenciais de live, áudio e transmissão são executados/configurados separadamente. Nunca coloque credenciais privadas no GitHub.

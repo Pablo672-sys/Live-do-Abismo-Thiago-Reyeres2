@@ -1,0 +1,12 @@
+BONECO DO ABISMO — INSTALAÇÃO NO WINDOWS
+
+1. Extraia o ZIP inteiro para uma pasta.
+2. Instale Python 3.12 em https://www.python.org/downloads/
+   Marque "Add python.exe to PATH".
+3. Abra esta pasta e dê dois cliques em INSTALAR.bat.
+4. Aguarde a instalação e mantenha a janela aberta enquanto usa o painel.
+5. O painel abre em http://127.0.0.1:9292
+
+O instalador prepara o painel e as dependências Python básicas.
+A transmissão ao vivo e o motor XTTS podem precisar de componentes extras.
+A voz original só pode ser usada quando sua gravação de referência estiver incluída no projeto.

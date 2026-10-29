@@ -19,10 +19,10 @@
 
   function render(data) {
     latest = data || {};
-    versions.textContent = `Instalada: ${data.local_short || "?"} · GitHub: ${data.remote_short || "?"}`;
+    versions.textContent = `Instalada: ${data.local_short || "ZIP sem marcador"} · GitHub: ${data.remote_short || "?"}`;
 
     if (!data.ok) summary.textContent = data.error || "Falha ao consultar atualização.";
-    else if (data.dirty) summary.textContent = "Há alterações locais; atualização automática bloqueada.";
+    else if (data.update_mode !== "zip" && data.dirty) summary.textContent = "Há alterações locais; atualização automática bloqueada.";
     else if (Number(data.ahead || 0) > 0) summary.textContent = "Existem commits locais ainda não enviados ao GitHub.";
     else if (data.update_available) summary.textContent = `${data.behind} atualização(ões) disponível(is).`;
     else summary.textContent = "Sistema atualizado.";
@@ -62,7 +62,7 @@
     if (liveRunning()) return;
     if (!window.confirm("Baixar a nova versão do GitHub agora?")) return;
     updateButton.disabled = true;
-    output.textContent = "Baixando atualização com git pull --ff-only...";
+    output.textContent = latest?.update_mode === "zip" ? "Baixando a versão do GitHub e preservando seus arquivos pessoais..." : "Baixando atualização com git pull --ff-only...";
     try {
       const response = await fetch("/api/system-update/apply", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
       const data = await response.json();

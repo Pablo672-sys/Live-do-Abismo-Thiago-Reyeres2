@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import gc
+import os
 import unicodedata
 from pathlib import Path
 
@@ -21,9 +22,14 @@ def main() -> None:
     args = parser.parse_args()
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    if not torch.cuda.is_available():
-        raise RuntimeError("GPU CUDA indisponivel para XTTS.")
-    tts = TTS(model_name=XTTS_MODEL_NAME).to("cuda")
+    # CUDA acelera a síntese, mas não deve ser requisito: em PCs sem CUDA
+    # o XTTS usa CPU em vez de cair no áudio de contingência (um bip).
+    use_cuda = torch.cuda.is_available()
+    if not use_cuda:
+        torch.set_num_threads(max(1, int(os.getenv("BONECO_GAME_TTS_CPU_THREADS", "2"))))
+    device = "cuda" if use_cuda else "cpu"
+    print(f"XTTS device={device}", flush=True)
+    tts = TTS(model_name=XTTS_MODEL_NAME).to(device)
     tts.tts_to_file(
         text=unicodedata.normalize("NFC", args.text),
         speaker_wav=[str(Path(args.voice))],

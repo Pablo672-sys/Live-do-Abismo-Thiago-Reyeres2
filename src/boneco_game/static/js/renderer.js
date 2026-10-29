@@ -29,6 +29,7 @@ const actorLayer = document.getElementById("actorLayer");
 const mapBack = document.getElementById("mapBack");
 const mapFront = document.getElementById("mapFront");
 const videoA = document.getElementById("actorVideoA");
+const actorStill = document.getElementById("actorStill");
 const videoB = document.getElementById("actorVideoB");
 const sceneAudio = document.getElementById("sceneAudio");
 const musicAudio = document.getElementById("musicAudio");
@@ -85,6 +86,7 @@ let walkMotion = {
   stop_end: 14.6,
 };
 let mediaCacheVersion = "";
+let avatarStillPath = "";
 let activeSpeechToken = 0;
 let speechBusy = false;
 let speechFetchBusy = false;
@@ -1290,10 +1292,28 @@ function shouldHoldSpeechForIdleFullPlay() {
 }
 
 async function setScene(scene, options = {}) {
+  if (scene === "idle" && avatarStillPath && !mediaState.idle?.length) {
+    currentScene = "idle"; currentVideo = "";
+    actorStill.src = fileUrl(avatarStillPath); actorStill.hidden = false;
+    videoA.pause(); videoB.pause(); videoA.hidden = true; videoB.hidden = true;
+    stage.classList.remove("avatar-video-mode","avatar-photo-talking");
+    return true;
+  }
+  if (scene === "talking" && avatarStillPath && !mediaState.talking?.length) {
+    currentScene = "talking"; actorStill.hidden = false;
+    stage.classList.add("avatar-photo-talking");
+    return true;
+  }
+  if (scene === "idle" && avatarStillPath) actorStill.src = fileUrl(avatarStillPath);
   if (currentScene === scene && currentVideo && !options.force) return true;
   const list = mediaForScene(scene);
   const path = pick(list, currentVideo) || pick(mediaState.idle, currentVideo);
-  if (!path) return false;
+  if (!path) {
+    if (scene === "idle" && avatarStillPath) { actorStill.hidden = false; return true; }
+    return false;
+  }
+  actorStill.hidden = true; videoA.hidden = false; videoB.hidden = false;
+  stage.classList.add("avatar-video-mode"); stage.classList.remove("avatar-photo-talking");
   currentScene = scene;
   const fullPlay = scene === "idle" && isDanceIdleVideo(path);
   return switchVideo(path, { ...options, loop: !fullPlay, fullPlay });
@@ -1314,6 +1334,7 @@ async function pollState() {
     }
     if (nextMediaVersion) mediaCacheVersion = nextMediaVersion;
     mediaState = payload.media || mediaState;
+    avatarStillPath = String(payload.avatar_image || "");
     runtimeConfig = {
       ...runtimeConfig,
       ...(payload.runtime || {}),
@@ -1948,6 +1969,7 @@ async function playSpeechJob(job) {
 }
 
 async function finishSpeechVisual(token = activeSpeechToken) {
+  stage.classList.remove("avatar-photo-talking");
   if (token !== activeSpeechToken) return;
   stopTimeline();
   sceneAudio.pause();

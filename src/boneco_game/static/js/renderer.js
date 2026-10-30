@@ -20,7 +20,6 @@ const TUNNEL_H = 640;
 const BELLY_PROFILE_BASE_SIZE = 92;
 
 const stage = document.getElementById("stage");
-stage.dataset.robot = "true";
 const tunnelCanvas = document.getElementById("tunnelCanvas");
 const tunnelCtx = tunnelCanvas ? tunnelCanvas.getContext("2d", { alpha: false }) : null;
 const skyLayer = document.getElementById("skyLayer");

@@ -66,6 +66,7 @@ let tunnelPeopleSignature = "";
 const tunnelImageCache = new Map();
 let mediaState = {
   idle: [],
+  dancing: [],
   talking: [],
   walk_right: [],
   walk_left: [],
@@ -1256,6 +1257,8 @@ function nextFrame() {
 }
 
 function mediaForScene(scene) {
+  if (scene === "idle" && !speechBusy && musicAudio && !musicAudio.paused && mediaState.dancing?.length) return mediaState.dancing;
+  if (scene === "dancing") return mediaState.dancing;
   if (scene === "walk_start_right") return mediaState.walk_start_right?.length ? mediaState.walk_start_right : mediaState.walk_right;
   if (scene === "walk_loop_right") return mediaState.walk_loop_right?.length ? mediaState.walk_loop_right : mediaState.walk_right;
   if (scene === "walk_stop_right") return mediaState.walk_stop_right?.length ? mediaState.walk_stop_right : mediaState.walk_right;

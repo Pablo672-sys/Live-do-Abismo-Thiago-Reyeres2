@@ -109,6 +109,7 @@ def renderer_state() -> dict[str, Any]:
     map_name = str(state.get("map_name") or DEFAULT_MAP)
     media = {
         "idle": _video_list(avatar, "Mudo"),
+        "dancing": _video_list(avatar, "Dancando"),
         "talking": _video_list(avatar, "Falando"),
         "walk_right": _video_list(avatar, "Andando_Direita"),
         "walk_left": _video_list(avatar, "Andando_Esquerda"),

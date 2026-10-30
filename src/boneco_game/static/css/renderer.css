@@ -510,9 +510,8 @@ body {
 }
 
 
-/* Boneco robô: modelo frontal procedural, sem imagens externas. */
-#stage[data-robot="true"] .actorVideo,
-#stage[data-robot="true"] #bellyProfile { display:none !important; }
+/* O avatar configurado tem prioridade sobre o boneco procedural. */
+#stage.avatar-image-mode .robot-character { display:none !important; }
 .robot-character {
   --metal:#a9c7d2; --metal-dark:#354c5b; --metal-light:#e7fbff; --glow:#40ffe1;
   position:absolute; left:50%; bottom:105px; width:330px; height:690px;

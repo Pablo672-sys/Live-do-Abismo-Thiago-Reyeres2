@@ -4,6 +4,8 @@ $Project = $PSScriptRoot
 $VenvPython = Join-Path $Project ".venv\Scripts\python.exe"
 
 Set-Location $Project
+# Prioriza o código-fonte desta instalação e evita importar uma cópia antiga do pacote.
+$env:PYTHONPATH = (Join-Path $Project "src")
 $env:BONECO_GAME_DIR = $Project
 $env:BONECO_GAME_ASSETS_DIR = Join-Path $Project "assets"
 $env:BONECO_GAME_HOST = "0.0.0.0"
@@ -40,4 +42,4 @@ Write-Host "Se o celular não conectar, permita Python no Firewall do Windows pa
 Write-Host "Para parar o servidor, pressione Ctrl+C." -ForegroundColor Yellow
 Write-Host ""
 
-& $VenvPython -m uvicorn boneco_game.main:app --host 0.0.0.0 --port 9292
+& $VenvPython -m uvicorn --app-dir (Join-Path $Project "src") boneco_game.main:app --host 0.0.0.0 --port 9292

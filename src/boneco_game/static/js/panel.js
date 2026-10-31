@@ -20,8 +20,6 @@ async function refreshStatus() {
   document.getElementById("currentMode").textContent = payload.state?.mode || "preview";
   document.getElementById("statusBox").textContent = JSON.stringify(payload, null, 2);
   applyVisualControls(payload.state || {});
-  const skin = document.getElementById("characterSkin");
-  if (skin && document.activeElement !== skin) skin.value = ["robot", "spongebob", "homer"].includes(payload.state?.current_actor) ? payload.state.current_actor : "robot";
   updateLiveToggle(payload);
 }
 
@@ -435,19 +433,7 @@ document.getElementById("stopTransmission").addEventListener("click", async () =
   await post("/api/transmission/stop", {});
   refreshStatus();
 });
-const characterSkin = document.getElementById("characterSkin");
-if (characterSkin) {
-  characterSkin.addEventListener("change", async () => {
-    const status = document.getElementById("characterSkinStatus");
-    try {
-      await post("/api/state", { current_actor: characterSkin.value });
-      if (status) status.textContent = "Personagem aplicado na tela.";
-      await refreshStatus();
-    } catch (err) {
-      if (status) status.textContent = "Não foi possível aplicar: " + err.message;
-    }
-  });
-}
+
 document.getElementById("sendSpeech").addEventListener("click", async () => {
   const text = document.getElementById("manualText").value;
   const actor = document.getElementById("actor").value;

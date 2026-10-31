@@ -153,16 +153,34 @@ function fitStage() {
 window.addEventListener("resize", fitStage, { passive: true });
 fitStage();
 
-audioUnlock.addEventListener("click", () => {
+audioUnlock.addEventListener("click", async () => {
   sceneAudio.muted = false;
   sceneAudio.volume = 1;
-  if (musicAudio) {
-    musicAudio.muted = false;
-    musicAudio.playbackRate = 1;
-    musicAudio.play().catch(() => {});
-    if (musicAudioContext?.state === "suspended") musicAudioContext.resume().catch(() => {});
+  if (!musicTracks.length) {
+    audioUnlock.textContent = "MÚSICA AINDA CARREGANDO…";
+    return;
   }
-  audioUnlock.hidden = true;
+  audioUnlock.textContent = "ATIVANDO ÁUDIO…";
+  try {
+    if (musicAudioContext?.state === "suspended") await musicAudioContext.resume();
+    if (!musicCurrent || !musicAudio.src) {
+      const next = pick(musicTracks);
+      if (next) {
+        musicCurrent = next;
+        musicAudio.src = fileUrl(next);
+        musicAudio.currentTime = 0;
+      }
+    }
+    musicAudio.muted = false;
+    musicAudio.volume = speechBusy ? MUSIC_SPEECH_VOLUME : MUSIC_IDLE_VOLUME;
+    musicAudio.playbackRate = 1;
+    await musicAudio.play();
+    audioUnlock.hidden = true;
+  } catch (err) {
+    console.warn("music playback blocked", err);
+    audioUnlock.textContent = "CLIQUE PARA ATIVAR A MÚSICA";
+    audioUnlock.hidden = false;
+  }
 });
 
 function fileUrl(path) {
@@ -287,8 +305,12 @@ function syncMusicTracks(tracks) {
   if (!musicTracks.length) {
     if (musicAudio) musicAudio.pause();
     musicCurrent = "";
+    audioUnlock.textContent = "AGUARDANDO MÚSICAS…";
+    audioUnlock.hidden = false;
     return;
   }
+  audioUnlock.textContent = "CLIQUE PARA ATIVAR A MÚSICA";
+  audioUnlock.hidden = false;
   if (!musicTracks.includes(musicCurrent)) {
     playNextMusic(true);
   }
@@ -336,6 +358,7 @@ function playNextMusic(force = false) {
 if (musicAudio) {
   musicAudio.addEventListener("ended", () => playNextMusic(false));
   musicAudio.addEventListener("play", () => {
+    audioUnlock.hidden = true;
     if (!speechBusy) setScene("idle", { force: true }).catch(console.warn);
   });
   musicAudio.addEventListener("pause", () => {

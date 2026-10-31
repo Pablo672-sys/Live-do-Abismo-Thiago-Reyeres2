@@ -32,7 +32,6 @@ const actorStill = document.getElementById("actorStill");
 const videoB = document.getElementById("actorVideoB");
 const sceneAudio = document.getElementById("sceneAudio");
 const musicAudio = document.getElementById("musicAudio");
-const audioUnlock = document.getElementById("audioUnlock");
 const messageCard = document.getElementById("messageCard");
 const avatarImage = document.getElementById("avatarImage");
 const avatarLetter = document.getElementById("avatarLetter");
@@ -153,35 +152,7 @@ function fitStage() {
 window.addEventListener("resize", fitStage, { passive: true });
 fitStage();
 
-audioUnlock.addEventListener("click", async () => {
-  sceneAudio.muted = false;
-  sceneAudio.volume = 1;
-  if (!musicTracks.length) {
-    audioUnlock.textContent = "MÚSICA AINDA CARREGANDO…";
-    return;
-  }
-  audioUnlock.textContent = "ATIVANDO ÁUDIO…";
-  try {
-    if (musicAudioContext?.state === "suspended") await musicAudioContext.resume();
-    if (!musicCurrent || !musicAudio.src) {
-      const next = pick(musicTracks);
-      if (next) {
-        musicCurrent = next;
-        musicAudio.src = fileUrl(next);
-        musicAudio.currentTime = 0;
-      }
-    }
-    musicAudio.muted = false;
-    musicAudio.volume = speechBusy ? MUSIC_SPEECH_VOLUME : MUSIC_IDLE_VOLUME;
-    musicAudio.playbackRate = 1;
-    await musicAudio.play();
-    audioUnlock.hidden = true;
-  } catch (err) {
-    console.warn("music playback blocked", err);
-    audioUnlock.textContent = "CLIQUE PARA ATIVAR A MÚSICA";
-    audioUnlock.hidden = false;
-  }
-});
+// Reprodução automática da trilha sonora; sem botão de ativação manual.
 
 function fileUrl(path) {
   if (!path) return "";
@@ -305,12 +276,8 @@ function syncMusicTracks(tracks) {
   if (!musicTracks.length) {
     if (musicAudio) musicAudio.pause();
     musicCurrent = "";
-    audioUnlock.textContent = "AGUARDANDO MÚSICAS…";
-    audioUnlock.hidden = false;
     return;
   }
-  audioUnlock.textContent = "CLIQUE PARA ATIVAR A MÚSICA";
-  audioUnlock.hidden = false;
   if (!musicTracks.includes(musicCurrent)) {
     playNextMusic(true);
   }
@@ -350,15 +317,12 @@ function playNextMusic(force = false) {
   musicAudio.volume = speechBusy ? MUSIC_SPEECH_VOLUME : MUSIC_IDLE_VOLUME;
   musicAudio.muted = false;
   ensureMusicAnalyser();
-  musicAudio.play().catch(() => {
-    audioUnlock.hidden = false;
-  });
+  musicAudio.play().catch((err) => console.warn("autoplay de música bloqueado pelo navegador", err));
 }
 
 if (musicAudio) {
   musicAudio.addEventListener("ended", () => playNextMusic(false));
   musicAudio.addEventListener("play", () => {
-    audioUnlock.hidden = true;
     if (!speechBusy) setScene("idle", { force: true }).catch(console.warn);
   });
   musicAudio.addEventListener("pause", () => {
@@ -1998,7 +1962,6 @@ async function playSpeechJob(job) {
   sceneAudio.addEventListener("error", finishOnce, { once: true });
   startLipSync(timeline, sceneAudio, token);
   await sceneAudio.play().catch(() => {
-    audioUnlock.hidden = false;
     stopTimeline();
     window.setTimeout(() => finishSpeechVisual(token), fallbackMs);
   });

@@ -371,9 +371,13 @@ if (musicAudio) {
   });
   musicAudio.addEventListener("ended", () => playNextMusic(false));
   musicAudio.addEventListener("play", () => {
-    if (!speechBusy) setScene("dancing", { force: true }).catch(console.warn);
+    if (!speechBusy) {
+      actorLayer.classList.add("avatar-dancing");
+      setScene("dancing", { force: true }).catch(console.warn);
+    }
   });
   musicAudio.addEventListener("pause", () => {
+    actorLayer.classList.remove("avatar-dancing");
     if (!speechBusy) setScene("idle", { force: true }).catch(console.warn);
   });
 }
@@ -2008,7 +2012,28 @@ async function playSpeechJob(job) {
   await setScene("talking", { force: true, startAt: 0 });
 
   if (!audioPath) {
-    window.setTimeout(() => finishSpeechVisual(token), fallbackMs);
+    if ("speechSynthesis" in window && String(job.text || "").trim()) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(String(job.text));
+      utterance.lang = "pt-BR";
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const ptVoice = voices.find((voice) => /^pt-BR$/i.test(voice.lang)) ||
+        voices.find((voice) => /^pt/i.test(voice.lang));
+      if (ptVoice) utterance.voice = ptVoice;
+      utterance.onend = () => finishSpeechVisual(token);
+      utterance.onerror = () => finishSpeechVisual(token);
+      window.speechSynthesis.speak(utterance);
+      window.setTimeout(() => {
+        if (token === activeSpeechToken && speechBusy) {
+          window.speechSynthesis.cancel();
+          finishSpeechVisual(token);
+        }
+      }, Math.max(5000, fallbackMs * 3));
+    } else {
+      window.setTimeout(() => finishSpeechVisual(token), fallbackMs);
+    }
     return;
   }
 
@@ -2030,6 +2055,7 @@ async function playSpeechJob(job) {
 
 async function finishSpeechVisual(token = activeSpeechToken) {
   stage.classList.remove("avatar-photo-talking");
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   if (token !== activeSpeechToken) return;
   stopTimeline();
   sceneAudio.pause();
@@ -2042,6 +2068,7 @@ async function finishSpeechVisual(token = activeSpeechToken) {
   const startedNext = await pollSpeech();
   if (!startedNext && token === activeSpeechToken) {
     const musicIsPlaying = musicAudio && !musicAudio.paused && musicTracks.length > 0;
+    actorLayer.classList.toggle("avatar-dancing", Boolean(musicIsPlaying));
     await setScene(musicIsPlaying ? "dancing" : "idle", { force: musicIsPlaying }).catch(console.warn);
   }
 }

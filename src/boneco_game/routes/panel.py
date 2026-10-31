@@ -9,6 +9,10 @@ from fastapi.templating import Jinja2Templates
 from boneco_game.core.settings import TEMPLATES_DIR
 from boneco_game.services import live_events
 from boneco_game.services.system_update import schedule_restart as schedule_system_restart, status as system_update_status, update as apply_system_update
+from boneco_game.services.media_library import avatar_dir, list_avatar_videos
+from boneco_game.services.tts_service import DEFAULT_VOICE
+from boneco_game.core.json_store import read_json
+from boneco_game.core.settings import RUNS_DIR
 from boneco_game.services.background_removal import start as start_background_removal, status as background_removal_status
 from boneco_game.services.event_decision_worker import status as decision_worker_status
 from boneco_game.services.live_health import run_check_once as live_health_check, status as live_health_status
@@ -75,6 +79,30 @@ async def api_avatar_upload(kind: str = Form(...), file: UploadFile = File(...))
         if old != target: old.unlink(missing_ok=True)
     target.write_bytes(data)
     return JSONResponse({"ok": True, "message": "Imagem parada salva." if mode == "still" else "Vídeo de fala salvo.", "filename": target.name})
+
+
+@router.get("/api/renderer/diagnostics", response_class=JSONResponse)
+def api_renderer_diagnostics() -> JSONResponse:
+    """Diagnóstico do avatar, biblioteca de mídia e worker de voz."""
+    state = read_state()
+    avatar = str(state.get("avatar") or "")
+    root = avatar_dir(avatar)
+    media = {
+        "Mudo": list_avatar_videos(avatar, "Mudo"),
+        "Dancando": list_avatar_videos(avatar, "Dancando"),
+        "Falando": list_avatar_videos(avatar, "Falando"),
+    }
+    worker = read_json(RUNS_DIR / "tts_worker_status.json", {"state": "unknown"})
+    return JSONResponse({
+        "avatar": avatar,
+        "assets_directory_exists": root.is_dir(),
+        "media": {
+            name: {"count": len(paths), "files": [path.name for path in paths[:30]]}
+            for name, paths in media.items()
+        },
+        "voice": {"exists": DEFAULT_VOICE.is_file(), "filename": DEFAULT_VOICE.name},
+        "tts_worker": worker,
+    })
 
 
 @router.get("/api/live/health", response_class=JSONResponse)

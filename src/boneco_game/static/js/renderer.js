@@ -317,13 +317,41 @@ function tryPlayCurrentMusic() {
     .finally(() => { musicPlayPending = false; });
 }
 
+// Desbloqueia o áudio na primeira interação natural com a tela, sem botão extra.
+let musicGestureUnlocked = false;
+async function unlockMusicFromGesture() {
+  if (musicGestureUnlocked || !musicAudio || !musicTracks.length) return;
+  musicGestureUnlocked = true;
+  try {
+    if (musicAudioContext?.state === "suspended") await musicAudioContext.resume();
+    if (!musicCurrent) {
+      const firstTrack = pick(musicTracks);
+      if (firstTrack) {
+        musicCurrent = firstTrack;
+        musicAudio.src = fileUrl(firstTrack);
+        musicAudio.load();
+      }
+    }
+    musicAudio.muted = false;
+    musicAudio.volume = speechBusy ? MUSIC_SPEECH_VOLUME : MUSIC_IDLE_VOLUME;
+    await musicAudio.play();
+  } catch (err) {
+    musicGestureUnlocked = false;
+    console.warn("Áudio ainda não liberado pelo navegador.", err);
+  }
+}
+document.addEventListener("pointerdown", unlockMusicFromGesture, { passive: true });
+document.addEventListener("keydown", unlockMusicFromGesture);
+
 function playNextMusic(force = false) {
   if (!musicAudio || !musicTracks.length) return;
   const next = pick(musicTracks, force ? "" : musicCurrent);
   if (!next) return;
   if (next !== musicCurrent) {
     musicCurrent = next;
+    musicAudio.pause();
     musicAudio.src = fileUrl(next);
+    musicAudio.load();
     musicAudio.currentTime = 0;
   }
   musicAudio.loop = musicTracks.length < 2;
@@ -335,6 +363,12 @@ function playNextMusic(force = false) {
 }
 
 if (musicAudio) {
+  musicAudio.addEventListener("error", () => {
+    console.error("Falha ao carregar a faixa de música:", musicAudio.currentSrc, musicAudio.error);
+  });
+  musicAudio.addEventListener("canplay", () => {
+    if (musicAudio.paused) tryPlayCurrentMusic();
+  });
   musicAudio.addEventListener("ended", () => playNextMusic(false));
   musicAudio.addEventListener("play", () => {
     if (!speechBusy) setScene("idle", { force: true }).catch(console.warn);

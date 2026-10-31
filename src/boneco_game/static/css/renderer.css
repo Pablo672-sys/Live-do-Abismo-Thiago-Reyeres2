@@ -515,3 +515,19 @@ body {
 #stage.avatar-image-mode .robot-character{display:none!important}
 #stage.avatar-photo-talking .actorStill{animation:avatarTalkPulse .18s ease-in-out infinite alternate}
 @keyframes avatarTalkPulse{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.008)}}
+
+
+/* Movimento de dança de contingência quando não há clipe na pasta Dancando. */
+#actorLayer.avatar-dancing .actorStill,
+#actorLayer.avatar-dancing .actorVideo.active {
+  transform-origin: 50% 82%;
+  animation: bonecoDanceFallback 720ms ease-in-out infinite alternate;
+}
+#actorLayer.avatar-dancing .actorStill { transform: translate(-50%, -50%); }
+@keyframes bonecoDanceFallback {
+  0% { transform: translate3d(-1.2%, 0, 0) rotate(-2deg) scale(1.015); }
+  25% { transform: translate3d(1.2%, -1.2%, 0) rotate(2deg) scale(1.025); }
+  50% { transform: translate3d(-1%, -1.8%, 0) rotate(-1.5deg) scale(1.02); }
+  75% { transform: translate3d(1%, 0, 0) rotate(1.8deg) scale(1.03); }
+  100% { transform: translate3d(0, -1.4%, 0) rotate(0deg) scale(1.02); }
+}

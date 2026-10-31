@@ -1394,6 +1394,7 @@ async function pollState() {
     visualMode = String(payload.state?.visual_mode || "tunnel") === "map" ? "map" : "tunnel";
     stage.dataset.visual = visualMode;
     stage.dataset.mode = String(urlMode || payload.state?.mode || "normal");
+    stage.dataset.character = ["robot", "spongebob", "homer"].includes(payload.state?.current_actor) ? payload.state.current_actor : "robot";
     syncMusicTracks(payload.music || []);
     syncTunnelPeople(payload.visual_people || []);
     if (isTunnelMode()) {

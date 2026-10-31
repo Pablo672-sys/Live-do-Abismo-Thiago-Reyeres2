@@ -335,6 +335,12 @@ function playNextMusic(force = false) {
 
 if (musicAudio) {
   musicAudio.addEventListener("ended", () => playNextMusic(false));
+  musicAudio.addEventListener("play", () => {
+    if (!speechBusy) setScene("idle", { force: true }).catch(console.warn);
+  });
+  musicAudio.addEventListener("pause", () => {
+    if (!speechBusy) setScene("idle", { force: true }).catch(console.warn);
+  });
 }
 
 function updateMusicVolume() {
@@ -1307,8 +1313,12 @@ async function setScene(scene, options = {}) {
     return true;
   }
   if (scene === "idle" && avatarStillPath) actorStill.src = fileUrl(avatarStillPath);
-  if (currentScene === scene && currentVideo && !options.force) return true;
   const list = mediaForScene(scene);
+  if (currentScene === scene && currentVideo && !options.force) {
+    const currentBelongsToScene = list.includes(currentVideo) ||
+      (!list.length && (mediaState.idle || []).includes(currentVideo));
+    if (currentBelongsToScene) return true;
+  }
   const path = pick(list, currentVideo) || pick(mediaState.idle, currentVideo);
   if (!path) {
     if (scene === "idle" && avatarStillPath) { actorStill.hidden = false; return true; }

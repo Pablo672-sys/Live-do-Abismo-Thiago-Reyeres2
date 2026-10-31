@@ -91,13 +91,12 @@ def push_ready(job: dict[str, Any]) -> None:
 
 def prepare_pending_job(job: dict[str, Any]) -> dict[str, Any]:
     metadata = job.get("metadata") if isinstance(job.get("metadata"), dict) else {}
-    voice_path = Path(str(metadata.get("voice_path") or "")) if metadata.get("voice_path") else None
+    # A identidade vocal do Boneco deve ser fixa: nunca aceitar voice_path
+    # vindo de eventos, painel ou metadados, pois isso troca a referência do XTTS.
     synth_kwargs: dict[str, Any] = {
         "speed": metadata.get("voice_speed") if metadata.get("voice_speed") is not None else None,
         "pitch": metadata.get("voice_pitch") if metadata.get("voice_pitch") is not None else None,
     }
-    if voice_path and voice_path.is_file():
-        synth_kwargs["voice_path"] = voice_path
     speech_payload = synthesize_for_job(str(job.get("text") or ""), **synth_kwargs)
     raw_timeline = speech_payload.get("timeline")
     raw_segments = raw_timeline.get("segments") if isinstance(raw_timeline, dict) else raw_timeline

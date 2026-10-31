@@ -61,7 +61,11 @@ def _worker_loop() -> None:
                 "error": f"{type(exc).__name__}: {exc}",
                 "updated_at": time.time(),
             })
-            # Nunca enviar um trabalho sem áudio para a fila do renderer.
+            # XTTS indisponível: entrega o texto ao renderer para voz pt-BR do navegador.
+            job["audio_path"] = ""
+            job["timeline_path"] = ""
+            job["metadata"] = {**metadata, "browser_tts_fallback": True}
+            push_ready(job)
             continue
         push_ready(ready)
 

@@ -7,7 +7,11 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from boneco_game.core.settings import ASSETS_DIR, PROJECT_DIR, TEMPLATES_DIR
-from boneco_game.services.runtime_state import renderer_state
+from boneco_game.services.runtime_state import read_state, renderer_state
+from boneco_game.services.media_library import avatar_dir, list_avatar_videos
+from boneco_game.services.tts_service import DEFAULT_VOICE
+from boneco_game.core.json_store import read_json
+from boneco_game.core.settings import RUNS_DIR
 from boneco_game.services.speech_queue import pop_next
 
 
@@ -29,6 +33,28 @@ def api_renderer_state() -> JSONResponse:
 def api_next_speech() -> JSONResponse:
     job = pop_next()
     return JSONResponse({"job": job})
+
+@router.get("/api/renderer/diagnostics", response_class=JSONResponse)
+def api_renderer_diagnostics() -> JSONResponse:
+    state = read_state()
+    avatar = str(state.get("avatar") or "")
+    root = avatar_dir(avatar)
+    media = {
+        "Mudo": list_avatar_videos(avatar, "Mudo"),
+        "Dancando": list_avatar_videos(avatar, "Dancando"),
+        "Falando": list_avatar_videos(avatar, "Falando"),
+    }
+    worker = read_json(RUNS_DIR / "tts_worker_status.json", {"state": "unknown"})
+    return JSONResponse({
+        "avatar": avatar,
+        "assets_directory_exists": root.is_dir(),
+        "media": {
+            name: {"count": len(paths), "files": [path.name for path in paths[:30]]}
+            for name, paths in media.items()
+        },
+        "voice": {"exists": DEFAULT_VOICE.is_file(), "filename": DEFAULT_VOICE.name},
+        "tts_worker": worker,
+    })
 
 
 @router.get("/file")

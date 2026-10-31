@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import audioop
 import json
 import math
 import os
@@ -15,11 +14,23 @@ import wave
 from pathlib import Path
 
 from boneco_game.core.json_store import read_json
-from boneco_game.core.settings import ASSETS_DIR, LIVE_RUNTIME_CONFIG_FILE, PRIVATE_DIR, PROJECT_DIR, RUNS_DIR
+from boneco_game.core.settings import ASSETS_DIR, DEFAULT_AVATAR, LIVE_RUNTIME_CONFIG_FILE, PRIVATE_DIR, PROJECT_DIR, RUNS_DIR
 from boneco_game.services.audio_timeline import analyze_audio_timeline, build_audio_timeline_payload, write_audio_timeline_json
 
 
-DEFAULT_VOICE = ASSETS_DIR / "BONECO_MAPA_2D" / "voz" / "VOZ_RAPIDA_MASCULINA.wav"
+def _default_voice_path() -> Path:
+    configured = os.getenv("BONECO_TTS_VOICE_PATH", "").strip()
+    if configured:
+        return Path(configured).expanduser()
+    candidates = (
+        ASSETS_DIR / DEFAULT_AVATAR / "voz" / "VOZ_RAPIDA_MASCULINA.wav",
+        ASSETS_DIR / DEFAULT_AVATAR / "Voz" / "VOZ_RAPIDA_MASCULINA.wav",
+        ASSETS_DIR / "BONECO_MAPA_2D" / "voz" / "VOZ_RAPIDA_MASCULINA.wav",
+    )
+    return next((path for path in candidates if path.is_file()), candidates[0])
+
+
+DEFAULT_VOICE = _default_voice_path()
 XTTS_MODEL_NAME = "tts_models/multilingual/multi-dataset/xtts_v2"
 PREPARED_AUDIO_DIR = RUNS_DIR / "prepared_audio"
 TTS_ABBREVIATIONS_FILE = PRIVATE_DIR / "tts_abbreviations.json"
@@ -47,7 +58,7 @@ def synthesize_for_job(
     if not voice_path.is_file():
         raise FileNotFoundError(
             f"Voz original do Boneco nao encontrada: {voice_path}. "
-            "Confira BONECO_ASSETS_DIR e a pasta BONECO_MAPA_2D/voz."
+            "Confira BONECO_ASSETS_DIR, BONECO_TTS_VOICE_PATH e a pasta voz do avatar selecionado."
         )
     PREPARED_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
     output = PREPARED_AUDIO_DIR / f"speech_{uuid.uuid4().hex}.wav"

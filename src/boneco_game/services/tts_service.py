@@ -199,13 +199,11 @@ def _synthesize_chunk(text: str, output: Path, *, voice_path: Path, language: st
         _write_tts_error(f"xtts rc={result.returncode} text={text[:160]} stderr={result.stderr[-1200:]}")
     except Exception as exc:
         _write_tts_error(f"xtts {type(exc).__name__}: {exc} text={text[:160]}")
-    # No Windows, use a fala nativa do sistema como último recurso. Antes o
-    # programa criava um tom senoidal que parecia um bip e escondia a falha do XTTS.
-    if os.name == "nt" and _synthesize_windows_sapi(text, output):
-        _trim_trailing_silence(output)
-        return
-    _write_tts_error(f"tts_failed_no_speech text={text[:160]}")
-    _write_placeholder(output, duration=max(0.8, min(4.0, len(text) * 0.045)))
+    # Não substituir a voz original do Boneco pela voz genérica do Windows.
+    # Se o XTTS falhar, registrar o erro para correção em vez de gerar outra voz.
+    error_message = f"tts_failed_xtts_no_original_voice text={text[:160]}"
+    _write_tts_error(error_message)
+    raise RuntimeError(error_message)
 
 
 def _synthesize_xtts_cached(text: str, output_path: Path, *, language: str, voice_path: Path) -> bool:

@@ -44,6 +44,11 @@ def synthesize_for_job(
     speed: float | None = None,
     pitch: float | None = None,
 ) -> dict[str, object]:
+    if not voice_path.is_file():
+        raise FileNotFoundError(
+            f"Voz original do Boneco nao encontrada: {voice_path}. "
+            "Confira BONECO_ASSETS_DIR e a pasta BONECO_MAPA_2D/voz."
+        )
     PREPARED_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
     output = PREPARED_AUDIO_DIR / f"speech_{uuid.uuid4().hex}.wav"
     clean = _prepare_tts_input(text)

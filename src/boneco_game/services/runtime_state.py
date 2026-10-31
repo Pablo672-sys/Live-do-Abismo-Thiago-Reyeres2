@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from boneco_game.core.json_store import read_json, write_json_atomic
-from boneco_game.core.settings import DEFAULT_AVATAR, DEFAULT_MAP, LIVE_RUNTIME_CONFIG_FILE, RUNS_DIR
+from boneco_game.core.settings import ASSETS_DIR, DEFAULT_AVATAR, DEFAULT_MAP, LIVE_RUNTIME_CONFIG_FILE, RUNS_DIR
 from boneco_game.services import live_events
 from boneco_game.services.map_service import read_map
 from boneco_game.services.media_library import AUDIO_EXTENSIONS, avatar_dir, list_avatar_videos

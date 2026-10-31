@@ -303,6 +303,20 @@ function ensureMusicAnalyser() {
   }
 }
 
+let musicPlayPending = false;
+let musicRetryAfter = 0;
+
+function tryPlayCurrentMusic() {
+  if (!musicAudio || !musicCurrent || musicPlayPending || !musicAudio.paused) return;
+  const now = Date.now();
+  if (now < musicRetryAfter) return;
+  musicRetryAfter = now + 2500;
+  musicPlayPending = true;
+  musicAudio.play()
+    .catch((err) => console.warn("Não foi possível iniciar a música; mantendo a faixa atual para tentar novamente.", err))
+    .finally(() => { musicPlayPending = false; });
+}
+
 function playNextMusic(force = false) {
   if (!musicAudio || !musicTracks.length) return;
   const next = pick(musicTracks, force ? "" : musicCurrent);
@@ -317,7 +331,7 @@ function playNextMusic(force = false) {
   musicAudio.volume = speechBusy ? MUSIC_SPEECH_VOLUME : MUSIC_IDLE_VOLUME;
   musicAudio.muted = false;
   ensureMusicAnalyser();
-  musicAudio.play().catch((err) => console.warn("autoplay de música bloqueado pelo navegador", err));
+  tryPlayCurrentMusic();
 }
 
 if (musicAudio) {
@@ -333,7 +347,7 @@ if (musicAudio) {
 function updateMusicVolume() {
   if (!musicAudio || !musicTracks.length) return;
   if (musicAudio.paused) {
-    playNextMusic(false);
+    tryPlayCurrentMusic();
     return;
   }
   const target = speechBusy ? MUSIC_SPEECH_VOLUME : MUSIC_IDLE_VOLUME;

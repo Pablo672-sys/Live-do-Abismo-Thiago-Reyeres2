@@ -212,11 +212,14 @@ def _synthesize_xtts_cached(text: str, output_path: Path, *, language: str, voic
         import torch
         from TTS.api import TTS
 
-        if not torch.cuda.is_available():
-            return False
+        # XTTS v2 permanece como motor único: CUDA quando disponível, CPU caso contrário.
+        use_cuda = torch.cuda.is_available()
+        if not use_cuda:
+            torch.set_num_threads(max(1, int(os.getenv("BONECO_GAME_TTS_CPU_THREADS", "2"))))
+        device = "cuda" if use_cuda else "cpu"
         with _XTTS_LOCK:
             if _XTTS_MODEL is None:
-                _XTTS_MODEL = TTS(model_name=XTTS_MODEL_NAME).to("cuda")
+                _XTTS_MODEL = TTS(model_name=XTTS_MODEL_NAME).to(device)
             _XTTS_MODEL.tts_to_file(
                 text=unicodedata.normalize("NFC", text),
                 speaker_wav=[str(voice_path)],

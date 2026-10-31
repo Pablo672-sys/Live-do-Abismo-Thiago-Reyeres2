@@ -371,7 +371,7 @@ if (musicAudio) {
   });
   musicAudio.addEventListener("ended", () => playNextMusic(false));
   musicAudio.addEventListener("play", () => {
-    if (!speechBusy) setScene("idle", { force: true }).catch(console.warn);
+    if (!speechBusy) setScene("dancing", { force: true }).catch(console.warn);
   });
   musicAudio.addEventListener("pause", () => {
     if (!speechBusy) setScene("idle", { force: true }).catch(console.warn);
@@ -1297,9 +1297,23 @@ function nextFrame() {
   return new Promise(resolve => requestAnimationFrame(() => resolve()));
 }
 
+function musicDanceMatch() {
+  if (!musicCurrent || !mediaState.dancing?.length) return "";
+  const musicStem = fileNameFromPath(musicCurrent).replace(/\\.[^.]+$/, "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  return mediaState.dancing.find((path) => {
+    const danceStem = fileNameFromPath(path).replace(/\\.[^.]+$/, "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+    return danceStem === musicStem;
+  }) || "";
+}
+
+function danceMediaForCurrentMusic() {
+  const matched = musicDanceMatch();
+  return matched ? [matched] : mediaState.dancing;
+}
+
 function mediaForScene(scene) {
-  if (scene === "idle" && !speechBusy && musicAudio && !musicAudio.paused && mediaState.dancing?.length) return mediaState.dancing;
-  if (scene === "dancing") return mediaState.dancing;
+  if (scene === "idle" && !speechBusy && musicAudio && !musicAudio.paused && mediaState.dancing?.length) return danceMediaForCurrentMusic();
+  if (scene === "dancing") return danceMediaForCurrentMusic();
   if (scene === "walk_start_right") return mediaState.walk_start_right?.length ? mediaState.walk_start_right : mediaState.walk_right;
   if (scene === "walk_loop_right") return mediaState.walk_loop_right?.length ? mediaState.walk_loop_right : mediaState.walk_right;
   if (scene === "walk_stop_right") return mediaState.walk_stop_right?.length ? mediaState.walk_stop_right : mediaState.walk_right;
@@ -2027,7 +2041,8 @@ async function finishSpeechVisual(token = activeSpeechToken) {
   stage.classList.remove("robot-talking");
   const startedNext = await pollSpeech();
   if (!startedNext && token === activeSpeechToken) {
-    await setScene("idle").catch(console.warn);
+    const musicIsPlaying = musicAudio && !musicAudio.paused && musicTracks.length > 0;
+    await setScene(musicIsPlaying ? "dancing" : "idle", { force: musicIsPlaying }).catch(console.warn);
   }
 }
 

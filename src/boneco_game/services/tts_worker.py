@@ -54,13 +54,15 @@ def _worker_loop() -> None:
         except Exception as exc:
             metadata = job.get("metadata") if isinstance(job.get("metadata"), dict) else {}
             job["metadata"] = {**metadata, "prepare_error": f"{type(exc).__name__}: {exc}"}
-            ready = job
             _write_status({
                 "state": "error",
                 "job_id": job.get("id"),
+                "text": str(job.get("text") or "")[:220],
                 "error": f"{type(exc).__name__}: {exc}",
                 "updated_at": time.time(),
             })
+            # Nunca enviar um trabalho sem áudio para a fila do renderer.
+            continue
         push_ready(ready)
 
 

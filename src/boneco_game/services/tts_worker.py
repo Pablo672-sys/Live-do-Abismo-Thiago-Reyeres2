@@ -61,11 +61,16 @@ def _worker_loop() -> None:
                 "error": f"{type(exc).__name__}: {exc}",
                 "updated_at": time.time(),
             })
-            # XTTS indisponível: entrega o texto ao renderer para voz pt-BR do navegador.
-            job["audio_path"] = ""
-            job["timeline_path"] = ""
-            job["metadata"] = {**metadata, "browser_tts_fallback": True}
-            push_ready(job)
+            # A identidade vocal do Boneco é exclusiva: nunca usar voz do navegador.
+            # A fala falha aqui e não é enviada à fila do renderer sem áudio XTTS.
+            _write_status({
+                "state": "error",
+                "job_id": job.get("id"),
+                "text": str(job.get("text") or "")[:220],
+                "error": f"{type(exc).__name__}: {exc}",
+                "fallback": "disabled_original_voice_only",
+                "updated_at": time.time(),
+            })
             continue
         push_ready(ready)
 

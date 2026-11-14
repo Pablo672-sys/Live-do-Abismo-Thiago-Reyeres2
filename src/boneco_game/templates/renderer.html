@@ -47,5 +47,43 @@
     <audio id="musicAudio" preload="auto" loop></audio>
   </div>
   <script src="/static/js/renderer.js?v=62"></script>
+  <style>
+    #bonecoUpdateNotice{position:fixed;z-index:99999;top:12px;right:12px;max-width:min(340px,calc(100vw - 24px));padding:13px 15px;border:1px solid #e6b84a;border-radius:12px;background:#211b12;color:#fff4d2;font:14px/1.4 Arial,sans-serif;box-shadow:0 8px 30px #0008;display:none}
+    #bonecoUpdateNotice strong{display:block;margin-bottom:5px}
+    #bonecoUpdateNotice a{display:inline-block;margin-top:8px;color:#ffe08a;font-weight:700}
+    #bonecoUpdateNotice button{float:right;background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer}
+  </style>
+  <aside id="bonecoUpdateNotice" role="status" aria-live="polite">
+    <button type="button" id="bonecoUpdateClose" aria-label="Fechar">×</button>
+    <strong>Atualização disponível!</strong>
+    <span id="bonecoUpdateText">Existe uma nova versão do Boneco do Abismo no GitHub.</span>
+    <a href="/" target="_blank" rel="noopener">Abrir painel para atualizar</a>
+  </aside>
+  <script>
+    (() => {
+      const notice = document.getElementById("bonecoUpdateNotice");
+      const text = document.getElementById("bonecoUpdateText");
+      const close = document.getElementById("bonecoUpdateClose");
+      let alreadyShown = false;
+      close.addEventListener("click", () => { notice.style.display = "none"; });
+      async function checkForUpdate() {
+        try {
+          const response = await fetch("/api/system-update/status?fetch_remote=1", {cache:"no-store"});
+          const data = await response.json();
+          if (data && data.ok && data.update_available && !alreadyShown) {
+            alreadyShown = true;
+            text.textContent = data.remote_short
+              ? "Nova versão " + data.remote_short + " disponível. Abra o painel para instalar."
+              : "Existe uma nova versão no GitHub. Abra o painel para instalar.";
+            notice.style.display = "block";
+          }
+        } catch (error) {
+          console.warn("Não foi possível verificar atualizações do Boneco:", error);
+        }
+      }
+      window.setTimeout(checkForUpdate, 4000);
+      window.setInterval(checkForUpdate, 15 * 60 * 1000);
+    })();
+  </script>
 </body>
 </html>

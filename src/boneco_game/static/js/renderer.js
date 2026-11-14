@@ -2012,28 +2012,9 @@ async function playSpeechJob(job) {
   await setScene("talking", { force: true, startAt: 0 });
 
   if (!audioPath) {
-    if ("speechSynthesis" in window && String(job.text || "").trim()) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(String(job.text));
-      utterance.lang = "pt-BR";
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      const voices = window.speechSynthesis.getVoices();
-      const ptVoice = voices.find((voice) => /^pt-BR$/i.test(voice.lang)) ||
-        voices.find((voice) => /^pt/i.test(voice.lang));
-      if (ptVoice) utterance.voice = ptVoice;
-      utterance.onend = () => finishSpeechVisual(token);
-      utterance.onerror = () => finishSpeechVisual(token);
-      window.speechSynthesis.speak(utterance);
-      window.setTimeout(() => {
-        if (token === activeSpeechToken && speechBusy) {
-          window.speechSynthesis.cancel();
-          finishSpeechVisual(token);
-        }
-      }, Math.max(5000, fallbackMs * 3));
-    } else {
-      window.setTimeout(() => finishSpeechVisual(token), fallbackMs);
-    }
+    // Sem WAV do XTTS, não falar com a voz genérica do navegador.
+    console.error("Fala cancelada: áudio da voz original do Boneco não foi gerado pelo XTTS.", job);
+    finishSpeechVisual(token);
     return;
   }
 

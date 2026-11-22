@@ -1006,3 +1006,20 @@ Se também usa XTTS local:
 ```bash
 .venv/bin/python -m pip install -r requirements-live.txt
 ```
+
+
+## IA de texto local com Ollama (atualização)
+
+A geração de respostas do Boneco agora usa o **Ollama local**, sem chave da OpenAI e sem chamadas à API da OpenAI. O padrão é `llama3.2:3b` em `http://127.0.0.1:11434`.
+
+Guia completo para Windows 10/11: [docs/OLLAMA_WINDOWS.md](docs/OLLAMA_WINDOWS.md).
+
+Resumo da instalação do modelo:
+
+```powershell
+ollama pull llama3.2:3b
+ollama list
+Invoke-RestMethod http://127.0.0.1:11434/api/tags
+```
+
+O Ollama gera texto; a voz original/XTTS, renderer, monitor TikTok e transmissão permanecem separados. Esta alteração não inicia uma live.

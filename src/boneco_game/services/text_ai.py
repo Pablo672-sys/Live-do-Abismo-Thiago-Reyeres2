@@ -183,39 +183,51 @@ def generate_gift_thank_you(username: str, gift_name: object, repeat_count: obje
 
 
 def ask_text_ai(prompt: str, *, max_chars: int = 180, purpose: str = "chat", timeout: int = 60, model_override: str = "") -> str:
+    """Gera texto exclusivamente com Ollama local; nenhuma chave/API externa é usada."""
     config = _load_config()
-    api_key = str(config.get("openai_api_key") or "").strip()
-    if not api_key:
-        raise RuntimeError("openai_api_key nao configurada.")
-    model = str(model_override or config.get("model") or OPENAI_CHAT_NANO_MODEL).strip() or OPENAI_CHAT_NANO_MODEL
+    base_url = str(config.get("ollama_url") or "http://127.0.0.1:11434").strip().rstrip("/")
+    model = str(config.get("ollama_model") or config.get("model") or "llama3.2:3b").strip()
+    if not model:
+        model = "llama3.2:3b"
+
     payload = {
         "model": model,
-        "input": prompt,
-        "max_output_tokens": max(40, min(500, max_chars // 2 + 80)),
-        "temperature": 0.55,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": float(config.get("temperature", 0.55)),
+            "num_predict": max(48, min(512, max_chars // 2 + 80)),
+        },
     }
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-    project_id = str(config.get("openai_project_id") or "").strip()
-    if project_id:
-        headers["OpenAI-Project"] = project_id
     request = urllib.request.Request(
-        "https://api.openai.com/v1/responses",
+        f"{base_url}/api/generate",
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers=headers,
+        headers={"Content-Type": "application/json"},
         method="POST",
     )
     started = time.monotonic()
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        data = json.loads(response.read().decode("utf-8"))
-    text = str(data.get("output_text") or "").strip() or _extract_response_text(data)
-    _write_ai_log(f"provider=openai purpose={purpose} model={model} tempo={time.monotonic() - started:.2f}s chars={len(text)}")
-    if not text:
-        raise RuntimeError("IA retornou texto vazio.")
-    return clamp_text(text, max_chars)
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        _write_ai_error(
+            f"ollama purpose={purpose} model={model} url={base_url} "
+            f"erro={type(exc).__name__}: {exc}"
+        )
+        raise RuntimeError(
+            "Não foi possível acessar o Ollama. Confira se ele está aberto em "
+            "http://127.0.0.1:11434 e se o modelo "
+            f"{model} está instalado (ollama list)."
+        ) from exc
 
+    text = str(data.get("response") or "").strip()
+    _write_ai_log(
+        f"provider=ollama purpose={purpose} model={model} "
+        f"tempo={time.monotonic() - started:.2f}s chars={len(text)}"
+    )
+    if not text:
+        raise RuntimeError("Ollama retornou texto vazio.")
+    return clamp_text(text, max_chars)
 
 def _sanitize_ai_text(text: object, *, max_chars: int) -> str:
     clean = normalize_tts_text(text)

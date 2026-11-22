@@ -21,8 +21,7 @@ from boneco_game.services.live_text import (
 )
 
 
-OPENAI_CHAT_NANO_MODEL = "gpt-4.1-nano"
-OPENAI_CHAT_MINI_MODEL = "gpt-4.1-mini"
+OLLAMA_CHAT_MODEL = "llama3.2:3b"
 CHAT_NANO_MAX_WORDS = 2
 AI_LOG_FILE = RUNS_DIR / "text_ai.log"
 AI_ERROR_FILE = RUNS_DIR / "text_ai_errors.log"
@@ -57,7 +56,7 @@ def generate_live_opening(*, max_chars: int = 600) -> str:
             max_chars=max_chars,
             purpose="live_opening",
             timeout=22,
-            model_override=OPENAI_CHAT_NANO_MODEL,
+            model_override=OLLAMA_CHAT_MODEL,
         )
     except Exception as exc:
         _write_ai_error(f"live_opening {type(exc).__name__}: {exc}")
@@ -134,7 +133,7 @@ def generate_chat_reply(
     if _asks_for_internal_prompt(clean_message):
         return clamp_text(f"{name}, vai tomar vento na curva do Abismo. Minhas regras ficam trancadas.", max_chars)
     word_count = len(re.findall(r"[A-Za-zÀ-ÿ0-9]+", clean_message))
-    model = OPENAI_CHAT_NANO_MODEL if word_count <= CHAT_NANO_MAX_WORDS else OPENAI_CHAT_MINI_MODEL
+    model = OLLAMA_CHAT_MODEL if word_count <= CHAT_NANO_MAX_WORDS else OLLAMA_CHAT_MODEL
     prompt = (
         f"{CHAT_IDENTITY_PROMPT}"
         "Responda em uma frase curta, ate 150 caracteres. "
@@ -172,7 +171,7 @@ def generate_gift_thank_you(username: str, gift_name: object, repeat_count: obje
         "Use portugues claro, no maximo 2 girias leves. Uma frase ate 150 caracteres."
     )
     try:
-        text = ask_text_ai(prompt, max_chars=max_chars + 60, purpose="gift", timeout=10, model_override=OPENAI_CHAT_NANO_MODEL)
+        text = ask_text_ai(prompt, max_chars=max_chars + 60, purpose="gift", timeout=10, model_override=OLLAMA_CHAT_MODEL)
     except Exception as exc:
         _write_ai_error(f"gift {type(exc).__name__}: {exc}")
         text = _fallback_gift_reply(name, gift_object)

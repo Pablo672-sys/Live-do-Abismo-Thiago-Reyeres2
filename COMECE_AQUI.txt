@@ -27,3 +27,19 @@ OBSERVAÇÃO
 A instalação prepara o painel e as dependências básicas. Uma live completa pode
 exigir configuração adicional de XTTS/CUDA, Tor, navegador, áudio, vídeos e
 credenciais privadas. Nunca coloque chaves de transmissão ou credenciais no ZIP público.
+
+
+OLLAMA — IA DE TEXTO LOCAL
+Antes de usar as respostas inteligentes do Boneco:
+1. Instale o Ollama: https://ollama.com/download
+2. Abra o PowerShell e execute: ollama pull llama3.2:3b
+3. Confira com: ollama list
+4. Confira a API local com: Invoke-RestMethod http://127.0.0.1:11434/api/tags
+5. Se o serviço não responder, execute ollama serve em outra janela do PowerShell.
+6. Inicie o painel normalmente. O Boneco usa Ollama em http://127.0.0.1:11434.
+
+Tutorial completo: docs/OLLAMA_WINDOWS.md
+Diagnóstico: powershell -ExecutionPolicy Bypass -File scripts/test_ollama_windows.ps1
+
+A IA de texto não exige chave da OpenAI. O Ollama gera texto localmente; voz/XTTS,
+monitor TikTok, renderer e transmissão são componentes separados.
